@@ -1,9 +1,10 @@
-[gd_scene load_steps=7 format=2]
+[gd_scene load_steps=8 format=2]
 
 [ext_resource path="res://InputShaderMaterial.tres" type="Material" id=1]
 [ext_resource path="res://DomainColour.png" type="Texture" id=2]
 [ext_resource path="res://FunctionBar.gd" type="Script" id=3]
 [ext_resource path="res://ColorMapViewport.gd" type="Script" id=4]
+[ext_resource path="res://FunctionFucker.gd" type="Script" id=5]
 
 [sub_resource type="ViewportTexture" id=1]
 viewport_path = NodePath("Viewport")
@@ -42,6 +43,7 @@ size_flags_vertical = 3
 size_flags_stretch_ratio = 0.1
 
 [node name="FunctionBar" type="TextEdit" parent="VSplitContainer/HBoxContainer"]
+unique_name_in_owner = true
 margin_right = 510.0
 margin_bottom = 48.0
 size_flags_horizontal = 3
@@ -92,4 +94,32 @@ texture = SubResource( 2 )
 expand = true
 stretch_mode = 7
 
+[node name="DrawButton" type="Button" parent="."]
+unique_name_in_owner = true
+anchor_top = 0.94
+anchor_right = 0.06
+anchor_bottom = 1.0
+margin_left = 10.0
+margin_bottom = -10.0
+toggle_mode = true
+text = "DRAW"
+
+[node name="FunctionFucker" type="AcceptDialog" parent="."]
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+margin_left = -150.0
+margin_right = 150.0
+grow_horizontal = 2
+grow_vertical = 2
+popup_exclusive = true
+window_title = "Invalid Function"
+resizable = true
+dialog_text = "You fucked up your function my guy. Go fix"
+dialog_autowrap = true
+script = ExtResource( 5 )
+
+[connection signal="function_fucked" from="VSplitContainer/HBoxContainer/FunctionBar" to="FunctionFucker" method="_on_FunctionBar_function_fucked"]
+[connection signal="pressed" from="VSplitContainer/HBoxContainer/Button" to="Viewport" method="_on_Button_pressed"]
 [connection signal="pressed" from="VSplitContainer/HBoxContainer/Button" to="VSplitContainer/HBoxContainer/FunctionBar" method="_on_Button_pressed"]
