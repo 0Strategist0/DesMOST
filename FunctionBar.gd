@@ -73,6 +73,7 @@ func parse_string(text: String) -> Dictionary:
 		emit_signal("function_fucked", "Unmatched bracket in function")
 		return {}
 	# TODO: Make sure every character in string is legal
+	# TODO: Make sure only one letter functions
 	
 	# Split the text and get the input variable
 	var split_text := clean_text.split("=")
