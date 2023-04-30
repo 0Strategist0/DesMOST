@@ -6,8 +6,6 @@ const WHITESPACE := [" ", "\t", "\n"]
 
 const NUMERICS := "1234567890i."
 
-#TODO add sqrt
-
 const FUNC_ENCODE = {
 	"sqrt": "Š",
 	"sin": "Ś",
@@ -100,8 +98,6 @@ func parse_string(text: String) -> Dictionary:
 	if clean_text.count("(") != clean_text.count(")"):
 		emit_signal("function_fucked", "Unmatched bracket in function")
 		return {}
-	# TODO: Make sure every character in string is legal
-	# TODO: Make sure only one letter functions
 	
 	# Make sure the text is formatted properly
 	if clean_text.length() < 6 or clean_text[1] != "(" or clean_text[3] != ")" or clean_text[4] != "=":
@@ -119,6 +115,15 @@ func parse_string(text: String) -> Dictionary:
 	# Replace all function keywords with unique symbols
 	for key in FUNC_ENCODE.keys():
 		code_function = code_function.replace(key, FUNC_ENCODE[key])
+	
+	# Make sure all characters are allowed
+	for symbol in code_function:
+		if not (symbol in FUNC_DECODE.keys() 
+				or symbol in NUMERICS 
+				or symbol in ["(", ")", input_var]):
+			
+			emit_signal("function_fucked", "Illegal character '" + symbol + "' in expression.")
+			return {}
 	
 	# Replace the input variable with z
 	code_function = code_function.replace(input_var, "(z)")
