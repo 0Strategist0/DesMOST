@@ -47,7 +47,29 @@ const FUNC_DECODE = {
 	"^": "cpow"
 }
 
+const LATEX_DECODE = {
+	"Š": "\\sqrt",
+	"Ś": "\\sin",
+	"Ć": "\\cos",
+	"É": "\\exp",
+	"Ĺ": "\\ln",
+	"Ṕ": "^",
+	"Ṫ": "\\tan",
+	"Ŕ": "\\mathrm{Re}",
+	"Í": "\\mathrm{Im}",
+	"Á": "\\mathrm{Arg}",
+	"Ḿ": "\\mathrm{Mod}",
+	"ć": "\\mathrm{Conj}",
+	"+": "+", 
+	"-": "-", 
+	"*": "*", 
+	"/": "\\frac", 
+	"^": "^"
+}
+
 onready var shader_plot := $"%Input"
+
+onready var LaTeX := $"%LaTeX"
 
 onready var default_shadercode : String = shader_plot.material.shader.code
 
@@ -69,11 +91,25 @@ func parse_string(text: String) -> Dictionary:
 	for whitespace in WHITESPACE:
 		clean_text = clean_text.replace(whitespace, "")
 	
+	# Make sure string isn't too long
+	if clean_text.length() > 200:
+		emit_signal("function_fucked", "You definitely don't need an input that long")
+		return {}
+	
+	# Make sure brackets work
 	if clean_text.count("(") != clean_text.count(")"):
 		emit_signal("function_fucked", "Unmatched bracket in function")
 		return {}
 	# TODO: Make sure every character in string is legal
 	# TODO: Make sure only one letter functions
+	
+	# Make sure the text is formatted properly
+	if clean_text.length() < 6 or clean_text[1] != "(" or clean_text[3] != ")" or clean_text[4] != "=":
+		emit_signal("function_fucked", 
+		"Something is wrong with your input. \n"
+		+ "Make sure it has the form 'f(z) = expression'")
+		
+		return {}
 	
 	# Split the text and get the input variable
 	var split_text := clean_text.split("=")
@@ -374,6 +410,24 @@ func parsed_to_shadercode(expression: Dictionary) -> String:
 	
 	return code
 
+func parsed_to_latex(expression: Dictionary) -> String:
+	if expression.keys()[0] == "":
+		if expression.values()[0][0] is String:
+			return expression.values()[0][0].replace("2.7182818284590452353602874713527", "e").replace("3.14159265359", "\\pi")
+		else:
+			return "(" + parsed_to_latex(expression.values()[0][0]) + ")"
+	else:
+		var function : String = expression.keys()[0]
+		if LATEX_DECODE[function] in "+-*^":
+			return ("{" + parsed_to_latex(expression.values()[0][0]) + "}"
+					+ LATEX_DECODE[function]
+					+ "{" + parsed_to_latex(expression.values()[0][1]) + "}")
+		elif LATEX_DECODE[function] == "\\frac":
+			return ("\\frac{" + parsed_to_latex(expression.values()[0][0]) + "}{" 
+					+ parsed_to_latex(expression.values()[0][1]) + "}")
+		else:
+			return (LATEX_DECODE[function] + "{" + parsed_to_latex(expression.values()[0][0]) + "}")
+
 # Make sure f(z) is formatted properly
 # No "i" as the input variable
 # f(z) = log(exp(z + 2i) - i) + 1 breaks it
@@ -390,3 +444,10 @@ func _on_Button_pressed():
 
 		# Assign the new shader code to the shader
 		shader_plot.material.shader.code = new_code
+		
+		LaTeX._latexExpression = parsed_to_latex(parsed_expression)
+		LaTeX.Render()
+
+
+func _on_FunctionBar_text_changed():
+	pass # Replace with function body.

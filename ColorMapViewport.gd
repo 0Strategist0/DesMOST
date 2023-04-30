@@ -151,14 +151,17 @@ func select_image():
 	
 	return null
 
+func undo_zero(value: float) -> float:
+	return value if value != 0.0 else 1.0
+
 func get_rect_position(rect: TextureRect) -> Vector2:
 	var click_position : Vector2 = rect.get_local_mouse_position()
-	click_position.x /= rect.rect_size.x
-	click_position.y /= rect.rect_size.y
+	click_position.x /= undo_zero(rect.rect_size.x)
+	click_position.y /= undo_zero(rect.rect_size.y)
 	
-	var x_y_ratio := min(rect.rect_size.x / rect.rect_size.y, 1.0)
+	var x_y_ratio := min(rect.rect_size.x / undo_zero(rect.rect_size.y), 1.0)
 	var x_offset := (1.0 - x_y_ratio) / 2.0
-	var y_x_ratio := min(rect.rect_size.y / rect.rect_size.x, 1.0)
+	var y_x_ratio := min(rect.rect_size.y / undo_zero(rect.rect_size.x), 1.0)
 	var y_offset := (1.0 - y_x_ratio) / 2.0
 	
 	return Vector2(size.x * (click_position.x * x_y_ratio + x_offset), 
